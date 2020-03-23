@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d6ef1a48-dec7-4a56-bc03-7c64bf9cf66b" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution>
+      <executable />
+    </execution>
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="soundtoll@localhost" type="feb32156:DbDataSourceImpl" />
+      </path>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="soundtoll@localhost" type="feb32156:DbDataSourceImpl" />
+        <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
+      </path>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="soundtoll@localhost" type="feb32156:DbDataSourceImpl" />
+        <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="soundtoll: schema" type="76f4a085:MysqlImplModel$Schema" />
+      </path>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="soundtoll@localhost" type="feb32156:DbDataSourceImpl" />
+        <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
+        <item name="soundtoll: schema" type="76f4a085:MysqlImplModel$Schema" />
+        <item name="belastingen: table" type="285a2a93:MysqlImplModel$Table" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ProjectId" id="1WehC8aMIaIeiQWrSdtxGAlbGWL" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="mysql" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d6ef1a48-dec7-4a56-bc03-7c64bf9cf66b" name="Default Changelist" comment="" />
+      <created>1579515837790</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1579515837790</updated>
+      <workItem from="1579515841715" duration="2192000" />
+      <workItem from="1579524459632" duration="5234000" />
+      <workItem from="1579618360038" duration="175000" />
+      <workItem from="1581424823390" duration="5729000" />
+      <workItem from="1581503415811" duration="325000" />
+      <workItem from="1582029107794" duration="29000" />
+      <workItem from="1582031977738" duration="435000" />
+      <workItem from="1582032695751" duration="40000" />
+      <workItem from="1582044208686" duration="89000" />
+      <workItem from="1582127091873" duration="453000" />
+      <workItem from="1582127708164" duration="517000" />
+      <workItem from="1582205563320" duration="2025000" />
+      <workItem from="1582210653589" duration="90000" />
+      <workItem from="1582223944632" duration="1765000" />
+      <workItem from="1582289957644" duration="2757000" />
+      <workItem from="1582402664383" duration="1182000" />
+      <workItem from="1582404712728" duration="148000" />
+      <workItem from="1582463620954" duration="456000" />
+      <workItem from="1582477505506" duration="2740000" />
+      <workItem from="1582493308446" duration="347000" />
+      <workItem from="1582538601856" duration="12000" />
+      <workItem from="1582550657462" duration="641000" />
+      <workItem from="1582553242155" duration="402000" />
+      <workItem from="1582554281430" duration="175000" />
+      <workItem from="1582627435035" duration="7667000" />
+      <workItem from="1582719169348" duration="653000" />
+      <workItem from="1582727596856" duration="2243000" />
+      <workItem from="1582882157140" duration="7000" />
+      <workItem from="1582893678163" duration="2394000" />
+      <workItem from="1583068019581" duration="1833000" />
+      <workItem from="1583096064923" duration="88000" />
+      <workItem from="1583168102268" duration="5000" />
+      <workItem from="1583234628078" duration="9096000" />
+      <workItem from="1583314859745" duration="2650000" />
+      <workItem from="1583360866143" duration="11000" />
+      <workItem from="1583408499276" duration="3343000" />
+      <workItem from="1583491899035" duration="149000" />
+      <workItem from="1583750701066" duration="27000" />
+      <workItem from="1583940006643" duration="5555000" />
+      <workItem from="1584019572591" duration="198000" />
+      <workItem from="1584098704720" duration="619000" />
+      <workItem from="1584100001398" duration="351000" />
+      <workItem from="1584300738696" duration="17000" />
+      <workItem from="1584360833257" duration="940000" />
+      <workItem from="1584364376788" duration="957000" />
+      <workItem from="1584392698676" duration="1206000" />
+      <workItem from="1584441854981" duration="451000" />
+      <workItem from="1584443511773" duration="560000" />
+      <workItem from="1584474416334" duration="177000" />
+      <workItem from="1584477763613" duration="110000" />
+      <workItem from="1584537777074" duration="184000" />
+      <workItem from="1584553565892" duration="2980000" />
+      <workItem from="1584630463807" duration="805000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="459" y="135" key="#SQL_Dialects" timestamp="1579538492190">
+      <screen x="0" y="23" width="1920" height="1057" />
+    </state>
+    <state x="459" y="135" key="#SQL_Dialects/-1280.0.1280.800/0.23.1920.1057@0.23.1920.1057" timestamp="1579538492190" />
+    <state x="559" y="210" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1579524324729">
+      <screen x="0" y="23" width="1920" height="1057" />
+    </state>
+    <state x="559" y="210" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1280.0.1280.800/0.23.1920.1057@0.23.1920.1057" timestamp="1579524324729" />
+    <state x="676" y="403" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1579524036644">
+      <screen x="0" y="23" width="1920" height="1057" />
+    </state>
+    <state x="676" y="403" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/-1280.0.1280.800/0.23.1920.1057@0.23.1920.1057" timestamp="1579524036644" />
+    <state x="79" y="23" key="SettingsEditor" timestamp="1584100351917">
+      <screen x="0" y="23" width="1280" height="777" />
+    </state>
+    <state x="359" y="103" key="SettingsEditor/-1280.0.1280.800/0.23.1920.1057@0.23.1920.1057" timestamp="1579524431642" />
+    <state x="79" y="23" key="SettingsEditor/0.23.1280.777@0.23.1280.777" timestamp="1584100351917" />
+    <state width="623" height="498" key="SwitcherDM" timestamp="1584442646360">
+      <screen x="0" y="23" width="1680" height="1027" />
+    </state>
+    <state width="623" height="498" key="SwitcherDM/0.23.1680.1027@0.23.1680.1027" timestamp="1584442646360" />
+  </component>
+</project>
