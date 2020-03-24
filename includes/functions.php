@@ -97,28 +97,28 @@ function parse_codedStruc($codedStruc) {
     if ($queryArray["searchvalues"] == "none") {
         $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 20, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"jaar\", \"schipper_plaatsnaam\"], \"sort\": [{ \"$sortOrder.keyword\": {\"order\":\"asc\"}}]}";
     } else {
-        $json_struc = buildQuery($queryArray, $from);
+        $json_struc = buildQuery($queryArray, $from, $sortOrder);
     }
-    error_log($json_struc);
+    //error_log($json_struc);
     return $json_struc;
 }
 
-function buildQuery($queryArray, $from) {
+function buildQuery($queryArray, $from, $sortOrder) {
     $terms = array();
 
     foreach($queryArray["searchvalues"] as $item) {
         $terms[] = matchTemplate($item["field"], makeItems($item["values"]));
     }
 
-    return queryTemplate(implode(",", $terms), $from);
+    return queryTemplate(implode(",", $terms), $from, $sortOrder);
 }
 
 function matchTemplate($term, $value) {
     return "{\"terms\": {\"$term.keyword\": [$value]}}";
 }
 
-function queryTemplate($terms, $from) {
-    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 20, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"jaar\", \"schipper_plaatsnaam\"], \"sort\": [ { \"schipper_achternaam.keyword\": {\"order\":\"asc\"}} ] }";
+function queryTemplate($terms, $from, $sortOrder) {
+    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 20, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"jaar\", \"schipper_plaatsnaam\"], \"sort\": [ { \"$sortOrder.keyword\": {\"order\":\"asc\"}} ] }";
 }
 
 function makeItems($termArray) {
