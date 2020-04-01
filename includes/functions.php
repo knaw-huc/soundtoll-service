@@ -95,7 +95,7 @@ function parse_codedStruc($codedStruc) {
     $from = ($queryArray["page"] - 1) * PAGE_LENGTH;
     $sortOrder = $queryArray["sortorder"];
     if ($queryArray["searchvalues"] == "none") {
-        $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 20, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"jaar\", \"schipper_plaatsnaam\"], \"sort\": [{ \"$sortOrder.keyword\": {\"order\":\"asc\"}}]}";
+        $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 20, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"jaar\", \"schipper_plaatsnaam\"], \"sort\": [{ \"$sortOrder\": {\"order\":\"asc\"}}]}";
     } else {
         $json_struc = buildQuery($queryArray, $from, $sortOrder);
     }
@@ -138,9 +138,9 @@ function get_facets($field, $filter, $type) {
     }
     if ($field == "schipper_naam")
     {
-    $json_struc = "{\"query\": {\"regexp\": {\"schipper_achternaam.keyword\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field.keyword\",  \"size\" : $amount }}}}";
+    $json_struc = "{\"query\": {\"regexp\": {\"schipper_achternaam\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field\",  \"size\" : $amount }}}}";
     } else {
-        $json_struc = "{\"query\": {\"regexp\": {\"$field.keyword\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field.keyword\",  \"size\" : $amount }}}}";
+        $json_struc = "{\"query\": {\"regexp\": {\"$field\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field\",  \"size\" : $amount }}}}";
     }
 
     $result = elastic($json_struc);
@@ -154,7 +154,7 @@ function get_initial_facets($field, $type) {
         $amount = 5;
     }
     //error_log("{\"size\": 0,\"aggs\" : {\"names\" : {\"terms\" : { \"field\" : \"$field.keyword\",  \"size\" : $amount }}}}");
-    $json_struc = "{\"size\": 0,\"aggs\" : {\"names\" : {\"terms\" : { \"field\" : \"$field.keyword\",  \"size\" : $amount }}}}";
+    $json_struc = "{\"size\": 0,\"aggs\" : {\"names\" : {\"terms\" : { \"field\" : \"$field\",  \"size\" : $amount }}}}";
     $result = elastic($json_struc);
     echo send_json(array("buckets" => $result["aggregations"]["names"]["buckets"]));
 }
