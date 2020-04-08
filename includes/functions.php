@@ -48,8 +48,7 @@ function hist_places($letter, $page) {
 }
 
 function elastic($json_struc) {
-
-    //$json_struc = '{"size": 0,"aggs" : {"names" : {"terms" : { "field" : "schipper_achternaam.keyword",  "size" : 5 }}}}';
+    
     $options = array('Content-type: application/json', 'Content-Length: ' . strlen($json_struc));
 
     $ch = curl_init(ELASTIC_HOST);
@@ -91,7 +90,6 @@ function search($codedStruc) {
 
 function parse_codedStruc($codedStruc) {
     $queryArray = json_decode(base64_decode($codedStruc), true);
-    //error_log(print_r($queryArray, true));
     $from = ($queryArray["page"] - 1) * PAGE_LENGTH;
     $sortOrder = $queryArray["sortorder"];
     if ($queryArray["searchvalues"] == "none") {
@@ -114,11 +112,11 @@ function buildQuery($queryArray, $from, $sortOrder) {
 }
 
 function matchTemplate($term, $value) {
-    return "{\"terms\": {\"$term.keyword\": [$value]}}";
+    return "{\"terms\": {\"$term.raw\": [$value]}}";
 }
 
 function queryTemplate($terms, $from, $sortOrder) {
-    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 20, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"jaar\", \"schipper_plaatsnaam\"], \"sort\": [ { \"$sortOrder.keyword\": {\"order\":\"asc\"}} ] }";
+    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 20, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"jaar\", \"schipper_plaatsnaam\"], \"sort\": [ { \"$sortOrder\": {\"order\":\"asc\"}} ] }";
 }
 
 function makeItems($termArray) {
@@ -138,13 +136,26 @@ function get_facets($field, $filter, $type) {
     }
     if ($field == "schipper_naam")
     {
-    $json_struc = "{\"query\": {\"regexp\": {\"schipper_achternaam\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field\",  \"size\" : $amount }}}}";
+    $json_struc = "{\"query\": {\"regexp\": {\"schipper_achternaam\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field.raw\",  \"size\" : $amount }}}}";
     } else {
-        $json_struc = "{\"query\": {\"regexp\": {\"$field\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field\",  \"size\" : $amount }}}}";
+        $json_struc = "{\"query\": {\"regexp\": {\"$field\": {\"value\": \"$filter.*\"}}},\"aggs\": {\"names\" : {\"terms\" : { \"field\" : \"$field.raw\",  \"size\" : $amount }}}}";
     }
 
     $result = elastic($json_struc);
     send_json(array("buckets" => $result["aggregations"]["names"]["buckets"]));
+}
+
+function get_nested_facets($field, $type, $filter = "") {
+    if ($type == 'long') {
+        $amount = 10;
+    } else {
+        $amount = 5;
+    }
+    $field_elements = explode(".", $field);
+    $path = $field_elements[0];
+    $json_struc = "{\"size\": 0,\"aggs\": {\"nested_terms\": {\"nested\": {\"path\": \"$path\"},\"aggs\": {\"filter\": {\"filter\": {\"regexp\": {\"$field\": \"$filter.*\"}},\"aggs\": {\"names\": {\"terms\": {\"field\": \"$field.raw\",\"size\": $amount}}}}}}}}";
+    $result = elastic($json_struc);
+    send_json(array("buckets" => $result["aggregations"]["nested_terms"]["filter"]["names"]["buckets"]));
 }
 
 function get_initial_facets($field, $type) {
@@ -153,8 +164,7 @@ function get_initial_facets($field, $type) {
     } else {
         $amount = 5;
     }
-    //error_log("{\"size\": 0,\"aggs\" : {\"names\" : {\"terms\" : { \"field\" : \"$field.keyword\",  \"size\" : $amount }}}}");
-    $json_struc = "{\"size\": 0,\"aggs\" : {\"names\" : {\"terms\" : { \"field\" : \"$field\",  \"size\" : $amount }}}}";
+    $json_struc = "{\"size\": 0,\"aggs\" : {\"names\" : {\"terms\" : { \"field\" : \"$field.raw\",  \"size\" : $amount }}}}";
     $result = elastic($json_struc);
     echo send_json(array("buckets" => $result["aggregations"]["names"]["buckets"]));
 }

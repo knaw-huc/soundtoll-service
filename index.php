@@ -93,6 +93,19 @@ switch ($page) {
                         throw_error();
                     }
                     break;
+                case "nested_facet":
+                    if (isset($segments[4]) && isset($segments[5])) {
+                        if (isset($segments[6]))
+                        {
+                            get_nested_facets($segments[4], $segments[5], strtolower($segments[6]));
+                        } else {
+                            get_nested_facets($segments[4], $segments[5]);
+                        }
+
+                    } else {
+                        throw_error();
+                    }
+                    break;
                 case "search":
                     if (isset($segments[4])) {
                         search($segments[4]);

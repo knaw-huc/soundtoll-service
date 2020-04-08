@@ -69,7 +69,6 @@ class db
     function hist_places($letter, $page) {
         $offset = $page - 1;
         $offset = $offset * BROWSE_PAGE_LENGTH;
-        //error_log("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place LIMIT $offset, " . PAGE_LENGTH);
         $results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place LIMIT $offset, " . BROWSE_PAGE_LENGTH));
         $results["data"] = array("itemList" => $results["data"], "page" => $page, "number_of_pages" => $this->hist_pagesPlaces($letter));
         return $results;
