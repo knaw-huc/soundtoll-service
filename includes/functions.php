@@ -97,7 +97,7 @@ function parse_codedStruc($codedStruc) {
     } else {
         $json_struc = buildQuery($queryArray, $from, $sortOrder);
     }
-    //error_log($json_struc);
+    error_log($json_struc);
     return $json_struc;
 }
 
@@ -105,7 +105,13 @@ function buildQuery($queryArray, $from, $sortOrder) {
     $terms = array();
 
     foreach($queryArray["searchvalues"] as $item) {
-        $terms[] = matchTemplate($item["field"], makeItems($item["values"]));
+        if (strpos($item["field"], '.')) {
+            $fieldArray = explode(".", $item["field"]);
+            $terms[] = nestedTemplate($fieldArray, makeItems($item["values"]));
+        } else {
+            $terms[] = matchTemplate($item["field"], makeItems($item["values"]));
+        }
+
     }
 
     return queryTemplate(implode(",", $terms), $from, $sortOrder);
@@ -113,6 +119,12 @@ function buildQuery($queryArray, $from, $sortOrder) {
 
 function matchTemplate($term, $value) {
     return "{\"terms\": {\"$term.raw\": [$value]}}";
+}
+
+function nestedTemplate($fieldArray, $value) {
+    $path = $fieldArray[0];
+    $field = implode(".", $fieldArray);
+    return "{\"nested\": {\"path\": \"$path\",\"query\": {\"bool\": {\"must\": [{\"terms\": {\"$field.raw\": [$value]}}]}}}}";
 }
 
 function queryTemplate($terms, $from, $sortOrder) {

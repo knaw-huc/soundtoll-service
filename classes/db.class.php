@@ -42,7 +42,8 @@ class db
     function shipmasters($letter, $page) {
         $offset = $page - 1;
         $offset = $offset * BROWSE_PAGE_LENGTH;
-        $results = $this->ass_arr($this->con->query("SELECT achternaam, volledige_naam FROM shipmasters WHERE letter= '$letter' ORDER BY achternaam, volledige_naam LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        //$results = $this->ass_arr($this->con->query("SELECT achternaam, volledige_naam FROM shipmasters WHERE letter= '$letter' ORDER BY achternaam, volledige_naam LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        $results = $this->ass_arr($this->con->query("SELECT achternaam, volledige_naam FROM shipmasters WHERE letter= '$letter' ORDER BY achternaam, volledige_naam "));
         //$results = $this->ass_arr($this->con->query("SELECT achternaam, volledige_naam FROM shipmasters WHERE achternaam = 'Hall' ORDER BY achternaam LIMIT $offset, " . PAGE_LENGTH));
         $results["data"] = array("itemList" => $results["data"], "page" => $page, "number_of_pages" => $this->pagesShipmasters($letter));
         return $results;
@@ -56,7 +57,8 @@ class db
     function places($letter, $page) {
         $offset = $page - 1;
         $offset = $offset * BROWSE_PAGE_LENGTH;
-        $results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        //$results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        $results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name"));
         $results["data"] = array("itemList" => $results["data"], "page" => $page, "number_of_pages" => $this->pagesPlaces($letter));
         return $results;
     }
@@ -69,7 +71,8 @@ class db
     function hist_places($letter, $page) {
         $offset = $page - 1;
         $offset = $offset * BROWSE_PAGE_LENGTH;
-        $results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        //$results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        $results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place"));
         $results["data"] = array("itemList" => $results["data"], "page" => $page, "number_of_pages" => $this->hist_pagesPlaces($letter));
         return $results;
     }
