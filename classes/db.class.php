@@ -49,6 +49,18 @@ class db
         return $results;
     }
 
+    function patronyms($letter) {
+        $results = $this->ass_arr($this->con->query("SELECT patroniem FROM patroniemen WHERE letter= '$letter' ORDER BY patroniem "));
+        $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
+        return $results;
+    }
+
+    function chr_names($letter) {
+        $results = $this->ass_arr($this->con->query("SELECT voornaam FROM voornamen WHERE letter= '$letter' ORDER BY voornaam "));
+        $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
+        return $results;
+    }
+
     function pagesShipmasters($letter) {
         $results = $this->ass_arr($this->con->query("SELECT count(*) AS aantal FROM shipmasters WHERE letter = '$letter'"));
         return ceil($results["data"][0]["aantal"] / PAGE_LENGTH);
@@ -60,6 +72,12 @@ class db
         //$results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name LIMIT $offset, " . BROWSE_PAGE_LENGTH));
         $results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name"));
         $results["data"] = array("itemList" => $results["data"], "page" => $page, "number_of_pages" => $this->pagesPlaces($letter));
+        return $results;
+    }
+
+    function commodities($letter) {
+        $results = $this->ass_arr($this->con->query("SELECT commodity AS name FROM commodities WHERE letter= '$letter' ORDER BY commodity"));
+        $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
         return $results;
     }
 
@@ -90,7 +108,7 @@ class db
 
     function passage($id)
     {
-        $retArr = $this->ass_arr($this->con->query("SELECT `id_doorvaart`, `volgnummer`, `schipper_voornamen`, `schipper_patroniem`, `schipper_tussenvoegsel`, `schipper_achternaam`, `schipper_plaatsnaam`, `tmp` as schipper_naam, CONCAT(dag, '-', maand, '-', jaar) AS datum, tonnage FROM doorvaarten WHERE id_doorvaart = $id"));
+        $retArr = $this->ass_arr($this->con->query("SELECT `id_doorvaart`, `volgnummer`, `schipper_voornamen`, `schipper_patroniem`, `schipper_tussenvoegsel`, `schipper_achternaam`, `schipper_plaatsnaam`, `tmp` as schipper_naam, CONCAT(dag, '-', maand, '-', jaar) AS datum,`soort_korting`, `korting_muntsoort1`, `korting_bedrag1`, `korting_muntsoort2`, `korting_bedrag2`, `korting_muntsoort3`, `korting_bedrag3`, `subtotaal1_muntsoort1`, `subtotaal1_bedrag1`, `subtotaal1_muntsoort2`, `subtotaal1_bedrag2`, `subtotaal1_muntsoort3`, `subtotaal1_bedrag3`, `subtotaal2_muntsoort1`, `subtotaal2_bedrag1`, `subtotaal2_muntsoort2`, `subtotaal2_bedrag2`, `subtotaal2_muntsoort3`, `subtotaal2_bedrag3`, `totaal_muntsoort1`, `totaal_bedrag1`, `totaal_muntsoort2`, `totaal_bedrag2`, `totaal_muntsoort3`, `totaal_bedrag3`, `totaal_muntsoort4`, `totaal_bedrag4`, `totaal_muntsoort5`, `totaal_bedrag5`, jaar, tonnage FROM doorvaarten WHERE id_doorvaart = $id"));
         $retArr["data"][0]["cargo"] = $this->getCargos($id);
         $retArr["data"][0]["tax"] = $this->getTaxes($id);
         $retArr["data"][0]["scans"] = $this->getScans($id);
