@@ -29,11 +29,7 @@ switch ($page) {
         break;
     case "places":
         if (isset($segments[3]) && isset($segments[4])) {
-            if (!is_numeric($segments[4]) || $segments[4] <= 0) {
-                throw_error("Invalid page parameter!");
-            } else {
-                places($segments[3], $segments[4]);
-            }
+            places($segments[3], $segments[4]);
         } else {
             throw_error("Too little parameters");
         }
@@ -68,11 +64,7 @@ switch ($page) {
         break;
     case "hist_places":
         if (isset($segments[3]) && isset($segments[4])) {
-            if (!is_numeric($segments[4]) || $segments[4] <= 0) {
-                throw_error("Invalid page parameter!");
-            } else {
-                hist_places($segments[3], $segments[4]);
-            }
+            hist_places($segments[3], $segments[4]);
         } else {
             throw_error("Too little parameters");
         }
@@ -99,7 +91,7 @@ switch ($page) {
         break;
     case "elastic":
         if (isset($segments[3])) {
-            switch($segments[3]) {
+            switch ($segments[3]) {
                 case "initial_facet":
                     if (isset($segments[4]) && isset($segments[5])) {
                         get_initial_facets($segments[4], $segments[5]);
@@ -116,8 +108,7 @@ switch ($page) {
                     break;
                 case "nested_facet":
                     if (isset($segments[4]) && isset($segments[5])) {
-                        if (isset($segments[6]))
-                        {
+                        if (isset($segments[6])) {
                             get_nested_facets($segments[4], $segments[5], strtolower($segments[6]));
                         } else {
                             get_nested_facets($segments[4], $segments[5]);
@@ -130,8 +121,7 @@ switch ($page) {
                 case "search":
                     if (isset($segments[4])) {
                         search($segments[4]);
-                    }
-                    else {
+                    } else {
                         throw_error();
                     }
                     break;

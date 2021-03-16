@@ -47,15 +47,15 @@ function patronyms($letter) {
     send_json($db->patronyms($letter));
 }
 
-function places($letter, $page) {
+function places($letter, $port) {
     global $db;
 
-    send_json($db->places($letter, $page));
+    send_json($db->places($letter, $port));
 }
 
-function hist_places($letter, $page) {
+function hist_places($letter, $port) {
     global $db;
-    send_json($db->hist_places($letter, $page));
+    send_json($db->hist_places($letter, $port));
 }
 
 function commodities($letter) {
@@ -65,12 +65,11 @@ function commodities($letter) {
 
 function elastic($json_struc) {
     $options = array('Content-type: application/json', 'Content-Length: ' . strlen($json_struc));
-
+    //error_log($json_struc);
     $ch = curl_init(ELASTIC_HOST);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $options);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
     curl_setopt($ch, CURLOPT_POSTFIELDS, $json_struc);
-    //curl_setopt($ch, CURLOPT_VERBOSE, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $response = curl_exec($ch);
     curl_close($ch);
@@ -92,7 +91,7 @@ function get_regions($size = "big") {
 function search($codedStruc) {
     $json_struc = parse_codedStruc($codedStruc);
     $send_back = array();
-
+    error_log($json_struc);
     $result = elastic($json_struc);
     $send_back["amount"] = $result["hits"]["total"]["value"];
     $send_back["pages"] = ceil($result["hits"]["total"]["value"] / PAGE_LENGTH);
@@ -111,7 +110,7 @@ function parse_codedStruc($codedStruc) {
     $sortField = $sortElements[0];
     $sortAscDesc = $sortElements[1];
     if ($queryArray["searchvalues"] == "none") {
-        $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"$sortField\": {\"order\":\"$sortAscDesc\"}}]}";
+        $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"$sortField\": {\"order\":\"$sortAscDesc\"}}]}";
     } else {
         $json_struc = buildQuery($queryArray, $from, $sortOrder);
     }
@@ -135,32 +134,53 @@ function buildQuery($queryArray, $from, $sortOrder) {
 }
 
 function matchTemplate($term, $value) {
-    return "{\"terms\": {\"$term.raw\": [$value]}}";
+    switch ($term) {
+        case "FREE_TEXT":
+            return "{\"multi_match\": {\"query\": \"$value\"}}";
+        case "PERIOD":
+            return yearValues($value);
+        case "jaar":
+            return "{\"terms\": {\"jaar\": [$value]}}";
+        default:
+            return "{\"terms\": {\"$term.raw\": [\"$value\"]}}";
+    }
+}
+
+function yearValues($range)
+{
+    $vals = explode("-", $range);
+    $from = $vals[0];
+    $to = $vals[1];
+    return "{\"range\": {\"jaar\": {\"from\": $from, \"to\": $to}}}";
 }
 
 function nestedTemplate($fieldArray, $value) {
     $path = $fieldArray[0];
     $field = implode(".", $fieldArray);
-    return "{\"nested\": {\"path\": \"$path\",\"query\": {\"bool\": {\"must\": [{\"terms\": {\"$field.raw\": [$value]}}]}}}}";
+    return "{\"nested\": {\"path\": \"$path\",\"query\": {\"bool\": {\"must\": [{\"terms\": {\"$field.raw\": [\"$value\"]}}]}}}}";
 }
 
 function queryTemplate($terms, $from, $sortOrder) {
     $sortElements = explode(";", $sortOrder);
     $sortField = $sortElements[0];
     $sortAscDesc = $sortElements[1];
-    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"schipper_achternaam\", \"schipper_naam\", \"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"$sortField\": {\"order\":\"$sortAscDesc\"}} ] }";
+    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" ,\"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"$sortField\": {\"order\":\"$sortAscDesc\"}} ] }";
 }
 
 function makeItems($termArray) {
     $retArray = array();
 
     foreach($termArray as $term) {
-        $retArray[] = "\"" . $term . "\"";
+        //$retArray[] = "\"" . $term . "\"";
+        $retArray[] = $term;
     }
     return implode(", ", $retArray);
 }
 
 function get_facets($field, $filter, $type) {
+    if ($filter != "") {
+        $filter = regShit($filter);
+    }
     if ($type == 'long') {
         $amount = 10;
     } else {
@@ -183,11 +203,23 @@ function get_nested_facets($field, $type, $filter = "") {
     } else {
         $amount = 5;
     }
+    if ($filter != "") {
+        $filter = regShit($filter);
+    }
     $field_elements = explode(".", $field);
     $path = $field_elements[0];
     $json_struc = "{\"size\": 0,\"aggs\": {\"nested_terms\": {\"nested\": {\"path\": \"$path\"},\"aggs\": {\"filter\": {\"filter\": {\"regexp\": {\"$field.raw\": \"$filter.*\"}},\"aggs\": {\"names\": {\"terms\": {\"field\": \"$field.raw\",\"size\": $amount}}}}}}}}";
     $result = elastic($json_struc);
     send_json(array("buckets" => $result["aggregations"]["nested_terms"]["filter"]["names"]["buckets"]));
+}
+
+function regShit($filter) {
+    if (strlen($filter) == 1) {
+        return "[" . strtoupper(substr($filter, 0, 1)) . strtolower(substr($filter, 0, 1)) . "]";
+    } else {
+        return "[" . strtoupper(substr($filter, 0, 1)) . strtolower(substr($filter, 0, 1)) . "]" . substr($filter, 1);
+    }
+
 }
 
 function get_initial_facets($field, $type) {

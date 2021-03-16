@@ -66,12 +66,23 @@ class db
         return ceil($results["data"][0]["aantal"] / PAGE_LENGTH);
     }
 
-    function places($letter, $page) {
-        $offset = $page - 1;
-        $offset = $offset * BROWSE_PAGE_LENGTH;
+    function places($letter, $port) {
+        switch ($port) {
+            case "plaats_standaard":
+                $port_type = "home_port";
+                break;
+            case "van_standaard.plaats":
+                $port_type = "from_port";
+                break;
+            case "naar_standaard.plaats":
+                $port_type = "to_port";
+                break;
+            default:
+                $port_type = "vnr";
+        }
         //$results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name LIMIT $offset, " . BROWSE_PAGE_LENGTH));
-        $results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name"));
-        $results["data"] = array("itemList" => $results["data"], "page" => $page, "number_of_pages" => $this->pagesPlaces($letter));
+        $results = $this->ass_arr($this->con->query("SELECT DISTINCT place_standard AS name FROM places_source WHERE letter_standard= '$letter' and $port_type = 1 ORDER BY place_standard"));
+        $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
         return $results;
     }
 
@@ -86,12 +97,23 @@ class db
         return ceil($results["data"][0]["aantal"] / PAGE_LENGTH);
     }
 
-    function hist_places($letter, $page) {
-        $offset = $page - 1;
-        $offset = $offset * BROWSE_PAGE_LENGTH;
+    function hist_places($letter, $port) {
+        switch ($port) {
+            case "schipper_plaatsnaam":
+                $port_type = "home_port";
+                break;
+            case "van.plaats":
+                $port_type = "from_port";
+                break;
+            case "naar.plaats":
+                $port_type = "to_port";
+                break;
+            default:
+                $port_type = "vnr";
+        }
         //$results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place LIMIT $offset, " . BROWSE_PAGE_LENGTH));
-        $results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place"));
-        $results["data"] = array("itemList" => $results["data"], "page" => $page, "number_of_pages" => $this->hist_pagesPlaces($letter));
+        $results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' AND $port_type = 1 ORDER BY place"));
+        $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => $this->hist_pagesPlaces($letter));
         return $results;
     }
 
@@ -108,7 +130,7 @@ class db
 
     function passage($id)
     {
-        $retArr = $this->ass_arr($this->con->query("SELECT `id_doorvaart`, `volgnummer`, `schipper_voornamen`, `schipper_patroniem`, `schipper_tussenvoegsel`, `schipper_achternaam`, `schipper_plaatsnaam`, `tmp` as schipper_naam, CONCAT(dag, '-', maand, '-', jaar) AS datum,`soort_korting`, `korting_muntsoort1`, `korting_bedrag1`, `korting_muntsoort2`, `korting_bedrag2`, `korting_muntsoort3`, `korting_bedrag3`, `subtotaal1_muntsoort1`, `subtotaal1_bedrag1`, `subtotaal1_muntsoort2`, `subtotaal1_bedrag2`, `subtotaal1_muntsoort3`, `subtotaal1_bedrag3`, `subtotaal2_muntsoort1`, `subtotaal2_bedrag1`, `subtotaal2_muntsoort2`, `subtotaal2_bedrag2`, `subtotaal2_muntsoort3`, `subtotaal2_bedrag3`, `totaal_muntsoort1`, `totaal_bedrag1`, `totaal_muntsoort2`, `totaal_bedrag2`, `totaal_muntsoort3`, `totaal_bedrag3`, `totaal_muntsoort4`, `totaal_bedrag4`, `totaal_muntsoort5`, `totaal_bedrag5`, jaar, tonnage FROM doorvaarten WHERE id_doorvaart = $id"));
+        $retArr = $this->ass_arr($this->con->query("SELECT `id_doorvaart`, `volgnummer`, `schipper_voornamen`, `schipper_patroniem`, `schipper_tussenvoegsel`, `schipper_achternaam`, `schipper_plaatsnaam`, `tmp` as schipper_naam, CONCAT(dag, '-', maand, '-', jaar) AS datum,`soort_korting`, `korting_muntsoort1`, `korting_bedrag1`, `korting_muntsoort2`, `korting_bedrag2`, `korting_muntsoort3`, `korting_bedrag3`, `subtotaal1_muntsoort1`, `subtotaal1_bedrag1`, `subtotaal1_muntsoort2`, `subtotaal1_bedrag2`, `subtotaal1_muntsoort3`, `subtotaal1_bedrag3`, `subtotaal2_muntsoort1`, `subtotaal2_bedrag1`, `subtotaal2_muntsoort2`, `subtotaal2_bedrag2`, `subtotaal2_muntsoort3`, `subtotaal2_bedrag3`, `totaal_muntsoort1`, `totaal_bedrag1`, `totaal_muntsoort2`, `totaal_bedrag2`, `totaal_muntsoort3`, `totaal_bedrag3`, `totaal_muntsoort4`, `totaal_bedrag4`, `totaal_muntsoort5`, `totaal_bedrag5`, jaar, tonnage, opmerking_bron FROM doorvaarten WHERE id_doorvaart = $id"));
         $retArr["data"][0]["cargo"] = $this->getCargos($id);
         $retArr["data"][0]["tax"] = $this->getTaxes($id);
         $retArr["data"][0]["scans"] = $this->getScans($id);
@@ -158,7 +180,12 @@ class db
     private function getRegister($name)
     {
         $results = $this->ass_arr($this->con->query("SELECT r.titel FROM `scans_totaal` as s, registers_totaal as r WHERE s.bnaam = '$name' AND s.registernr = r.registernr"));
-        return $results["data"][0]["titel"];
+        if (isset($results["data"][0]["titel"])) {
+            return $results["data"][0]["titel"];
+        } else {
+            return "";
+        }
+
     }
 
     private function getTaxes($id)
@@ -187,7 +214,7 @@ class db
         $retArray = array();
         $retArray = $this->getValuesFromPassage($id, "ladingen", "maat", $retArray);
         $retArray = $this->getValuesFromPassage($id, "ladingen", "maat_alt", $retArray);
-        return $retArray;
+        return $this->getStandardUnits($retArray);
     }
 
     private function getValuta($id)
@@ -231,6 +258,15 @@ class db
         return $retArray;
     }
 
+    private function getStandardUnits($array)
+    {
+        $retArray = array();
+        foreach ($array as $item) {
+            $retArray[] = $this->getStandardUnit($item);
+        }
+        return $retArray;
+    }
+
     private function getValutaCode($valuta)
     {
         $code = $this->ass_arr($this->con->query("SELECT short, URL FROM currency WHERE Name = '$valuta'"));
@@ -238,6 +274,16 @@ class db
             return array("name" => $valuta, "code" => "", "url" => "");
         } else {
             return array("name" => $valuta, "code" => $code["data"][0]["short"], "url" => $code["data"][0]["URL"]);
+        }
+    }
+
+    private function getStandardUnit($unit)
+    {
+        $code = $this->ass_arr($this->con->query("SELECT maat, st_maat FROM maten WHERE maat = '$unit'"));
+        if ($code["number_of_records"] == 0) {
+            return array("unit" => $unit, "standard_unit" => "");
+        } else {
+            return array("unit" => $unit, "standard_unit" => $code["data"][0]["st_maat"]);
         }
     }
 
