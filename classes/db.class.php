@@ -81,7 +81,7 @@ class db
                 $port_type = "vnr";
         }
         //$results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name LIMIT $offset, " . BROWSE_PAGE_LENGTH));
-        $results = $this->ass_arr($this->con->query("SELECT DISTINCT place_standard AS name FROM places_source WHERE letter_standard= '$letter' and $port_type = 1 ORDER BY place_standard"));
+        $results = $this->ass_arr($this->con->query("SELECT DISTINCT place_standard AS name, places_per_standard as list FROM places_source WHERE letter_standard= '$letter' and $port_type = 1 ORDER BY place_standard"));
         $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
         return $results;
     }

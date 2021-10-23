@@ -119,8 +119,8 @@ switch ($page) {
                     }
                     break;
                 case "search":
-                    if (isset($segments[4])) {
-                        search($segments[4]);
+                    if (isset($_GET["q"])) {
+                        search($_GET["q"]);
                     } else {
                         throw_error();
                     }
