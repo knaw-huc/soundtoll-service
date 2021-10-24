@@ -53,6 +53,12 @@ function places($letter, $port) {
     send_json($db->places($letter, $port));
 }
 
+function map_places() {
+    global $db;
+
+    send_json($db->get_map_places());
+}
+
 function hist_places($letter, $port) {
     global $db;
     send_json($db->hist_places($letter, $port));

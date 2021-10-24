@@ -86,6 +86,10 @@ class db
         return $results;
     }
 
+    function get_map_places() {
+        return $this->ass_arr($this->con->query("SELECT distinct st.Stednavn as place_standard, st.decLatitude as lat, st.decLongitude as lon FROM `places_source` as so, places_standard as st WHERE so.place_standard = st.Stednavn and so.home_port = 1 and st.Stednavn <> 'Unknown'"));
+    }
+
     function commodities($letter) {
         $results = $this->ass_arr($this->con->query("SELECT commodity AS name FROM commodities WHERE letter= '$letter' ORDER BY commodity"));
         $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
@@ -112,7 +116,7 @@ class db
                 $port_type = "vnr";
         }
         //$results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' ORDER BY place LIMIT $offset, " . BROWSE_PAGE_LENGTH));
-        $results = $this->ass_arr($this->con->query("SELECT place AS name FROM places_source WHERE letter= '$letter' AND $port_type = 1 ORDER BY place"));
+        $results = $this->ass_arr($this->con->query("SELECT place AS name, places_per_standard as list FROM places_source WHERE letter= '$letter' AND $port_type = 1 ORDER BY place"));
         $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => $this->hist_pagesPlaces($letter));
         return $results;
     }
@@ -139,8 +143,18 @@ class db
         $retArr["data"][0]["locations"] = $this->getPlaces($id);
         $retArr["data"][0]["valuta"] = $this->getValuta($id);
         $retArr["data"][0]["units"] = $this->getUnits($id);
+        $retArr["data"][0]["vide_list"] = $this->get_vide_list($id);
         $retArr["data"] = $retArr["data"][0];
         return $retArr;
+    }
+
+    function get_vide_list($id) {
+        $retArray = array();
+        $result = $this->ass_arr($this->con->query("SELECT id1 as id FROM `vide` WHERE id2 = $id UNION SELECT id2 as id from vide where id1 = $id"));
+        foreach ($result["data"] as $item) {
+            $retArray[] = $item["id"];
+        }
+        return $retArray;
     }
 
     function getmapInfo($code) {

@@ -34,6 +34,9 @@ switch ($page) {
             throw_error("Too little parameters");
         }
         break;
+    case "map_places":
+        map_places();
+        break;
     case "map":
         if (isset($segments[3])) {
             map_info($segments[3]);
