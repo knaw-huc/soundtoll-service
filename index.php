@@ -35,7 +35,11 @@ switch ($page) {
         }
         break;
     case "map_places":
-        map_places();
+        if (isset($segments[3])) {
+            map_places($segments[3]);
+        } else {
+            throw_error();
+        }
         break;
     case "map":
         if (isset($segments[3])) {

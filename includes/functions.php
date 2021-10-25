@@ -53,10 +53,10 @@ function places($letter, $port) {
     send_json($db->places($letter, $port));
 }
 
-function map_places() {
+function map_places($codedStruc) {
     global $db;
 
-    send_json($db->get_map_places());
+    send_json($db->get_map_places($codedStruc));
 }
 
 function hist_places($letter, $port) {
@@ -71,7 +71,7 @@ function commodities($letter) {
 
 function elastic($json_struc) {
     $options = array('Content-type: application/json', 'Content-Length: ' . strlen($json_struc));
-    error_log($json_struc);
+    //error_log($json_struc);
     $ch = curl_init(ELASTIC_HOST);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $options);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");

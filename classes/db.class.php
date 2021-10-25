@@ -86,8 +86,61 @@ class db
         return $results;
     }
 
-    function get_map_places() {
-        return $this->ass_arr($this->con->query("SELECT distinct st.Stednavn as place_standard, st.decLatitude as lat, st.decLongitude as lon FROM `places_source` as so, places_standard as st WHERE so.place_standard = st.Stednavn and so.home_port = 1 and st.Stednavn <> 'Unknown'"));
+    function get_map_places($codedStruc) {
+        $struc = json_decode(base64_decode($codedStruc), true);
+        $port = $struc["port"];
+        $query = "SELECT distinct st.Stednavn as place_standard, st.decLatitude as lat, st.decLongitude as lon FROM `places_source` as so, places_standard as st WHERE so.place_standard = st.Stednavn and so.$port = 1 and st.Stednavn <> 'Unknown'";
+        $region = $struc["region"];
+        if ($region != "0") {
+            $query .= " AND st.big_category_code = $region";
+        }
+        $query .= $this->add_map_years($port, $struc["years"]);
+        error_log($query);
+        return $this->ass_arr($this->con->query($query));
+    }
+
+    function add_map_years($port, $years) {
+        if ($years == "0") {
+            return "";
+        } else {
+            switch ($port) {
+                case "home_port":
+                    $table = "jaren_home";
+                    break;
+                case "from_port":
+                    $table = "jaren_van";
+                    break;
+                case "to_port":
+                    $table = "jaren_naar";
+                    break;
+                default:
+                    return "zeeman";
+            }
+
+            switch($years) {
+                case "1":
+                    $condition = " < 1634";
+                    break;
+                case "2":
+                    $condition = " BETWEEN 1634 AND 1857";
+                    break;
+                case "3":
+                    $condition = " BETWEEN 1634 AND 1700";
+                    break;
+                case "4":
+                    $condition = " BETWEEN 1700 AND 1750";
+                    break;
+                case "5":
+                    $condition = " BETWEEN 1750 AND 1800";
+                    break;
+                case "6":
+                    $condition = " BETWEEN 1800 AND 1857";
+                    break;
+                default:
+                    return "bonzo";
+            }
+            return " AND st.Stednavn IN (SELECT plaats FROM $table WHERE jaar $condition)";
+        }
     }
 
     function commodities($letter) {
