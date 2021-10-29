@@ -48,6 +48,13 @@ switch ($page) {
             throw_error();
         }
         break;
+    case "check_id":
+        if (isset($segments[3])) {
+            check_id($segments[3]);
+        } else {
+            throw_error();
+        }
+        break;
     case "commodities":
         if (isset($segments[3])) {
             commodities($segments[3]);

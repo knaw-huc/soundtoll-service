@@ -96,6 +96,7 @@ function get_regions($size = "big") {
 
 function search($codedStruc) {
     $json_struc = parse_codedStruc($codedStruc);
+    error_log($json_struc);
     $send_back = array();
     $result = elastic($json_struc);
     $send_back["amount"] = $result["hits"]["total"]["value"];
@@ -131,7 +132,7 @@ function buildQuery($queryArray, $from, $sortOrder) {
     $terms = array();
 
     foreach($queryArray["searchvalues"] as $item) {
-        if (strpos($item["field"], '.')) {
+        if (strpos($item["field"], '.') && strpos($item["field"], "FREE_TEXT:") > 0) {
             $fieldArray = explode(".", $item["field"]);
             $terms[] = nestedTemplate($fieldArray, makeItems($item["values"]));
         } else {
@@ -144,11 +145,15 @@ function buildQuery($queryArray, $from, $sortOrder) {
 }
 
 function matchTemplate($term, $value) {
+    $components = explode(":", $term);
+    if ($components[0] == "FREE_TEXT") {
+        return get_ft_matches($value, $components[1]);
+    }
     switch ($term) {
-        case "FREE_TEXT":
+        //case "FREE_TEXT":
             //return "{\"multi_match\": {\"query\": \"$value\"}}";
             //return "{\"wildcard\": {\"fulltext\": {\"value\": \"$value\"}}}";
-            return get_ft_matches($value);
+            //return get_ft_matches($value);
         case "PERIOD":
             return yearValues($value);
         case "jaar":
@@ -158,7 +163,7 @@ function matchTemplate($term, $value) {
     }
 }
 
-function get_ft_matches($values) {
+function get_ft_matches($values, $field) {
     $valArr = explode(",", $values);
     //error_log(print_r($valArr, true));
     $lengte = count($valArr);
@@ -167,12 +172,12 @@ function get_ft_matches($values) {
             return "";
         case 1:
             $val = strtolower(trim($valArr[0]));
-            return "{\"wildcard\": {\"fulltext\": {\"value\": \"$val\"}}}";
+            return "{\"wildcard\": {\"$field\": {\"value\": \"$val\"}}}";
         default:
             $retArr = array();
             foreach ($valArr as $value) {
                 $val = strtolower(trim($value));
-                $retArr[] = "{\"wildcard\": {\"fulltext\": {\"value\": \"$val\"}}}";
+                $retArr[] = "{\"wildcard\": {\"$field\": {\"value\": \"$val\"}}}";
             }
             return implode(",", $retArr);
     }
@@ -290,4 +295,19 @@ function send_elastic($json) {
     header('Content-Type: application/json; charset=UTF-8');
     header('Access-Control-Allow-Origin: *');
     echo $json;
+}
+
+function check_id($id) {
+    global $db;
+
+    if (is_numeric($id)) {
+        if (strpos($id, '.') || strpos($id, ',')) {
+            send_json(array("amount" => 0));
+        } else {
+            $recs = $db->is_passage($id);
+            send_json(array("amount" => $recs));
+        }
+    } else {
+        send_json(array("amount" => 0));
+    }
 }

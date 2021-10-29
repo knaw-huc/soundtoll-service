@@ -210,6 +210,12 @@ class db
         return $retArray;
     }
 
+    function is_passage($id) {
+        $result = $this->ass_arr($this->con->query("SELECT COUNT(*) as aantal FROM doorvaarten WHERE id_doorvaart = $id"));
+        return ($result["data"][0]["aantal"]);
+
+    }
+
     function getmapInfo($code) {
         $retArr = $this->ass_arr($this->con->query("SELECT Modern_name AS name, region, decLatitude as lat, decLongitude AS `long`, zoom FROM places_standard WHERE Kode = '$code'"));
         return $retArr["data"][0];
