@@ -228,15 +228,22 @@ class db
         foreach ($results["data"] as $item) {
             $tempArray = $item;
             $tempArray["url"] = $this->getScanURL($tempArray["bestandsnaam"]);
+            $tempArray["iiif"] = $this->getIIIF($tempArray["bestandsnaam"]);
             $buffer[] = $tempArray;
         }
         return $buffer;
     }
 
     private function getScanURL($scan) {
-        $server = "http://www2.soundtoll.nl/";
         $parts = explode("_", $scan);
-        return $server . strtolower($parts[0] . "/" . $scan);
+        return SCAN_HOST . strtolower($parts[0] . "/" . $scan);
+    }
+
+    private function getIIIF($scan) {
+        $parts = explode("_", $scan);
+        $fn = $parts[0] . "/" . $scan;
+        $result = $this->ass_arr($this->con->query("SELECT uri FROM iiif WHERE filename = '$fn'"));
+        return $result["data"][0]["uri"];
     }
 
     private function getSection($name)

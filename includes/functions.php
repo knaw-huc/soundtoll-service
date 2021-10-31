@@ -132,16 +132,24 @@ function buildQuery($queryArray, $from, $sortOrder) {
     $terms = array();
 
     foreach($queryArray["searchvalues"] as $item) {
-        if (strpos($item["field"], '.') && strpos($item["field"], "FREE_TEXT:") > 0) {
-            $fieldArray = explode(".", $item["field"]);
-            $terms[] = nestedTemplate($fieldArray, makeItems($item["values"]));
+        if (strpos($item["field"], '.')) {
+            if (strpos($item["field"], 'FREE_TEXT:') == 0) {
+                $terms[] = get_nested_free_texts($item["field"], makeItems($item["values"]));
+            } else {
+                $fieldArray = explode(".", $item["field"]);
+                $terms[] = nestedTemplate($fieldArray, makeItems($item["values"]));
+            }
         } else {
             $terms[] = matchTemplate($item["field"], makeItems($item["values"]));
         }
 
     }
-
     return queryTemplate(implode(",", $terms), $from, $sortOrder);
+}
+
+function get_nested_free_texts($field, $values) {
+    $components = explode(":", $field);
+
 }
 
 function matchTemplate($term, $value) {
