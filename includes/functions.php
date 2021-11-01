@@ -134,10 +134,10 @@ function buildQuery($queryArray, $from, $sortOrder) {
     foreach($queryArray["searchvalues"] as $item) {
         if (strpos($item["field"], '.')) {
             if (strpos($item["field"], 'FREE_TEXT:') == 0) {
-                $terms[] = get_nested_free_texts($item["field"], makeItems($item["values"]));
+                get_nested_free_texts($item["field"], makeItems($item["values"]), $terms);
             } else {
                 $fieldArray = explode(".", $item["field"]);
-                $terms[] = nestedTemplate($fieldArray, makeItems($item["values"]));
+                $terms[] = nestedTemplate($fieldArray, $item["values"]);
             }
         } else {
             $terms[] = matchTemplate($item["field"], makeItems($item["values"]));
@@ -147,9 +147,12 @@ function buildQuery($queryArray, $from, $sortOrder) {
     return queryTemplate(implode(",", $terms), $from, $sortOrder);
 }
 
-function get_nested_free_texts($field, $values) {
-    $components = explode(":", $field);
-
+function get_nested_free_texts($entry, $values, &$terms) {
+    $components = explode(":", $entry);
+    $field = $components[1];
+    $path = explode(".", $field);
+    $path = $path[0];
+        $terms[] = "{\"nested\": {\"path\": \"$path\", \"query\": {\"wildcard\": {\"$field\": {\"value\": \"$values\"}}}}}";
 }
 
 function matchTemplate($term, $value) {
