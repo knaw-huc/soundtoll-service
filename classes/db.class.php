@@ -91,12 +91,44 @@ class db
         $port = $struc["port"];
         $query = "SELECT distinct st.Stednavn as place_standard, st.decLatitude as lat, st.decLongitude as lon FROM `places_source` as so, places_standard as st WHERE so.place_standard = st.Stednavn and so.$port = 1 and st.Stednavn <> 'Unknown'";
         $region = $struc["region"];
+        $commodity = $struc["commodity"];
         if ($region != "0") {
             $query .= " AND st.big_category_code = $region";
         }
         $query .= $this->add_map_years($port, $struc["years"]);
+        if (trim($commodity) !== "") {
+            $tail = $this->addTail($commodity, $port);
+            $query .= $tail;
+        }
         error_log($query);
         return $this->ass_arr($this->con->query($query));
+    }
+
+    private function addTail($commodity, $port) {
+        $sql = "";
+        $condition = $this->commCondition($commodity);
+        switch ($port) {
+            case "home_port":
+                return " AND so.place IN (SELECT distinct schipper_plaatsnaam FROM doorvaarten as d, ladingen as l where d.id_doorvaart = l.id_doorvaart AND l.soort $condition)";
+                break;
+            case "from_port":
+                return " AND so.place IN (select DISTINCT van from ladingen where soort $condition)";
+                break;
+            case "to_port":
+                return " AND so.place IN (select DISTINCT naar from ladingen where soort $condition)";
+                break;
+        }
+        return $sql;
+    }
+
+    private function commCondition($commodity) {
+        $retVal = str_replace("?", "_", $commodity);
+        $retVal = str_replace("*", "%", $retVal);
+        if (strpos($retVal, "_") || strpos($retVal, "%")) {
+            return " LIKE '$retVal'";
+        } else {
+            return " = '$retVal'";
+        }
     }
 
     function add_map_years($port, $years) {

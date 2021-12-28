@@ -55,7 +55,6 @@ function places($letter, $port) {
 
 function map_places($codedStruc) {
     global $db;
-
     send_json($db->get_map_places($codedStruc));
 }
 
