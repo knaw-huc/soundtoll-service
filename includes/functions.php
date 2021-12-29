@@ -53,6 +53,18 @@ function places($letter, $port) {
     send_json($db->places($letter, $port));
 }
 
+function big_regions($region, $port) {
+    global $db;
+
+    send_json($db->big_regions($region, $port));
+}
+
+function small_regions($region, $port) {
+    global $db;
+
+    send_json($db->small_regions($region, $port));
+}
+
 function map_places($codedStruc) {
     global $db;
     send_json($db->get_map_places($codedStruc));
@@ -95,7 +107,7 @@ function get_regions($size = "big") {
 
 function search($codedStruc) {
     $json_struc = parse_codedStruc($codedStruc);
-    error_log($json_struc);
+    //error_log($json_struc);
     $send_back = array();
     $result = elastic($json_struc);
     $send_back["amount"] = $result["hits"]["total"]["value"];

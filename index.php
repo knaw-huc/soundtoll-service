@@ -34,6 +34,20 @@ switch ($page) {
             throw_error("Too little parameters");
         }
         break;
+    case "big_regions":
+        if (isset($segments[3]) && isset($segments[4])) {
+            big_regions($segments[3], $segments[4]);
+        } else {
+            throw_error("Too little parameters");
+        }
+        break;
+    case "small_regions":
+        if (isset($segments[3]) && isset($segments[4])) {
+            small_regions($segments[3], $segments[4]);
+        } else {
+            throw_error("Too little parameters");
+        }
+        break;
     case "map_places":
         if (isset($_GET["q"])) {
             map_places($_GET["q"]);

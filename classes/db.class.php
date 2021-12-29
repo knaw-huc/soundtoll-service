@@ -86,6 +86,46 @@ class db
         return $results;
     }
 
+    function big_regions($region, $port) {
+        switch ($port) {
+            case "plaats_standaard":
+                $port_type = "home_port";
+                break;
+            case "van_standaard.plaats":
+                $port_type = "from_port";
+                break;
+            case "naar_standaard.plaats":
+                $port_type = "to_port";
+                break;
+            default:
+                $port_type = "vnr";
+        }
+        //$results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        $results = $this->ass_arr($this->con->query("SELECT DISTINCT place_standard AS name, places_per_standard as list FROM places_source WHERE big_region = $region and $port_type = 1 ORDER BY place_standard"));
+        $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
+        return $results;
+    }
+
+    function small_regions($region, $port) {
+        switch ($port) {
+            case "plaats_standaard":
+                $port_type = "home_port";
+                break;
+            case "van_standaard.plaats":
+                $port_type = "from_port";
+                break;
+            case "naar_standaard.plaats":
+                $port_type = "to_port";
+                break;
+            default:
+                $port_type = "vnr";
+        }
+        //$results = $this->ass_arr($this->con->query("SELECT Modern_name AS name FROM places_standard WHERE letter= '$letter' ORDER BY Modern_name LIMIT $offset, " . BROWSE_PAGE_LENGTH));
+        $results = $this->ass_arr($this->con->query("SELECT DISTINCT place_standard AS name, places_per_standard as list FROM places_source WHERE small_region = $region and $port_type = 1 ORDER BY place_standard"));
+        $results["data"] = array("itemList" => $results["data"], "page" => 1, "number_of_pages" => 1);
+        return $results;
+    }
+
     function get_map_places($codedStruc) {
         $struc = json_decode(base64_decode($codedStruc), true);
         $port = $struc["port"];
@@ -100,7 +140,7 @@ class db
             $tail = $this->addTail($commodity, $port);
             $query .= $tail;
         }
-        error_log($query);
+        //error_log($query);
         return $this->ass_arr($this->con->query($query));
     }
 
