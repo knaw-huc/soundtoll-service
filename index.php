@@ -4,6 +4,8 @@ require(dirname(__FILE__) . '/config/db_config.php');
 require(dirname(__FILE__) . '/classes/db.class.php');
 require(dirname(__FILE__) . '/includes/functions.php');
 
+error_reporting(E_ALL);
+
 $URI = $_SERVER["REQUEST_URI"];
 
 $segments = explode('/', $URI);
@@ -111,10 +113,10 @@ switch ($page) {
     case "currency":
         currency();
         break;
-    case "small_regions":
+    case "small_regions_facets":
         get_regions("small");
         break;
-    case "big_regions":
+    case "big_regions_facets":
         get_regions("big");
         break;
     case "elastic":

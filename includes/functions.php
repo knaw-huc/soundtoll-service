@@ -108,6 +108,7 @@ function get_regions($size = "big") {
 function search($codedStruc) {
     $json_struc = parse_codedStruc($codedStruc);
     //error_log($json_struc);
+    //die($json_struc);
     $send_back = array();
     $result = elastic($json_struc);
     $send_back["amount"] = $result["hits"]["total"]["value"];
@@ -127,11 +128,11 @@ function parse_codedStruc($codedStruc) {
     $sortField = $sortElements[0];
     $sortAscDesc = $sortElements[1];
     if ($queryArray["searchvalues"] == "none") {
-        if ($sortField == "jaar") {
-            $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"jaar\": {\"order\":\"$sortAscDesc\"}}, { \"maand\": {\"order\":\"$sortAscDesc\"}}, { \"dag\": {\"order\":\"$sortAscDesc\"}}]}";
-        } else {
+        //if ($sortField == "jaar") {
+        //    $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"jaar\": {\"order\":\"$sortAscDesc\"}}, { \"maand\": {\"order\":\"$sortAscDesc\"}}, { \"dag\": {\"order\":\"$sortAscDesc\"}}]}";
+        //} else {
             $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"$sortField\": {\"order\":\"$sortAscDesc\"}}]}";
-        }
+        //}
 
     } else {
         $json_struc = buildQuery($queryArray, $from, $sortOrder);
@@ -143,8 +144,9 @@ function buildQuery($queryArray, $from, $sortOrder) {
     $terms = array();
 
     foreach($queryArray["searchvalues"] as $item) {
+
         if (strpos($item["field"], '.')) {
-            if (strpos($item["field"], 'FREE_TEXT:') == 0) {
+            if (strpos($item["field"], 'FREE_TEXT:') !== false) {
                 get_nested_free_texts($item["field"], makeItems($item["values"]), $terms);
             } else {
                 $fieldArray = explode(".", $item["field"]);
@@ -187,7 +189,6 @@ function matchTemplate($term, $value) {
 
 function get_ft_matches($values, $field) {
     $valArr = explode(",", $values);
-    //error_log(print_r($valArr, true));
     $lengte = count($valArr);
     switch ($lengte) {
         case 0:
@@ -216,18 +217,18 @@ function yearValues($range)
 function nestedTemplate($fieldArray, $value) {
     $path = $fieldArray[0];
     $field = implode(".", $fieldArray);
-    return "{\"nested\": {\"path\": \"$path\",\"query\": {\"bool\": {\"must\": [{\"terms\": {\"$field.raw\": [\"$value\"]}}]}}}}";
+    return "{\"nested\": {\"path\": \"$path\",\"query\": {\"bool\": {\"must\": [{\"terms\": {\"$field.raw\": [\"{$value[0]}\"]}}]}}}}";
 }
 
 function queryTemplate($terms, $from, $sortOrder) {
     $sortElements = explode(";", $sortOrder);
     $sortField = $sortElements[0];
     $sortAscDesc = $sortElements[1];
-    if ($sortField == "jaar") {
-        return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" ,\"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"jaar\": {\"order\":\"$sortAscDesc\"}}, { \"maand\": {\"order\":\"$sortAscDesc\"}}, { \"dag\": {\"order\":\"$sortAscDesc\"}} ] }";
-    } else {
+    //if ($sortField == "jaar") {
+    //    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" ,\"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"jaar\": {\"order\":\"$sortAscDesc\"}}, { \"maand\": {\"order\":\"$sortAscDesc\"}}, { \"dag\": {\"order\":\"$sortAscDesc\"}} ] }";
+    //} else {
         return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" ,\"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"$sortField\": {\"order\":\"$sortAscDesc\"}} ] }";
-    }
+    //}
 
 }
 
@@ -235,7 +236,7 @@ function makeItems($termArray) {
     $retArray = array();
 
     foreach($termArray as $term) {
-        //$retArray[] = "\"" . $term . "\"";
+        //$retArray[] = strtolower($term);
         $retArray[] = $term;
     }
     return implode(", ", $retArray);

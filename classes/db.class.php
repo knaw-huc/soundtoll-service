@@ -132,7 +132,7 @@ class db
         $query = "SELECT distinct st.Stednavn as place_standard, st.decLatitude as lat, st.decLongitude as lon FROM `places_source` as so, places_standard as st WHERE so.place_standard = st.Stednavn and so.$port = 1 and st.Stednavn <> 'Unknown'";
         $region = $struc["region"];
         $commodity = $struc["commodity"];
-        if ($region != "0") {
+        if ($region !== "0") {
             $query .= " AND st.big_category_code = $region";
         }
         $query .= $this->add_map_years($port, $struc["years"]);
@@ -140,7 +140,7 @@ class db
             $tail = $this->addTail($commodity, $port);
             $query .= $tail;
         }
-        //error_log($query);
+        error_log($query);
         return $this->ass_arr($this->con->query($query));
     }
 
