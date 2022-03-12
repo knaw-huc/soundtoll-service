@@ -22,6 +22,13 @@ switch ($page) {
     case "years":
         years();
         break;
+    case "download_results":
+        if (isset($_GET["name"]) && isset($_GET["q"])) {
+            download_table($_GET["name"], $_GET["q"]);
+        } else {
+            throw_error();
+        }
+        break;
     case "passage":
         if (isset($segments[3])) {
             passage($segments[3]);

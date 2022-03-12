@@ -16,6 +16,11 @@ class db
         return $this->ass_arr($results);
     }
 
+    function get_table($table, $ids) {
+        $results = $this->con->query("SELECT * FROM $table WHERE id_doorvaart IN ($ids)");
+        return $this->ass_arr($results);
+    }
+
     function years()
     {
         $results = $this->con->query("SELECT DISTINCT rolnr AS film FROM secties_totaal");
