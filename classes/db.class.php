@@ -8,6 +8,7 @@ class db
     function __construct()
     {
         $this->con = new mysqli(DB_SERVER, DB_USER, DB_PASSWD, DB_NAME);
+        $this->con->query("SET NAMES utf8");
     }
 
     function films()

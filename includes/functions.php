@@ -26,7 +26,7 @@ function download_table($name, $query) {
     $page = 1;
     $struc["page"] = $page;
     $queryStr = base64_encode(json_encode($struc));
-    header("Content-Type: text/csv");
+    header("Content-Type: text/csv charset=utf-8");
     header("Content-Disposition: attachment; filename=$name.csv");
     $results = search($queryStr, true);
     $ids = create_query_conditions($results["passages"]);
