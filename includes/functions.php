@@ -130,7 +130,7 @@ function commodities($letter) {
 
 function elastic($json_struc) {
     $options = array('Content-type: application/json', 'Content-Length: ' . strlen($json_struc));
-    //error_log($json_struc);
+    error_log($json_struc);
     $ch = curl_init(ELASTIC_HOST);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $options);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
@@ -302,8 +302,8 @@ function makeItems($termArray) {
     $retArray = array();
 
     foreach($termArray as $term) {
-        //$retArray[] = strtolower($term);
-        $retArray[] = $term;
+        $retArray[] = strtolower($term);
+        //$retArray[] = $term;
     }
     return implode(", ", $retArray);
 }
