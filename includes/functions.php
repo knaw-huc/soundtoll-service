@@ -41,7 +41,7 @@ function download_table($name, $query) {
         foreach ($set as $line) {
             fputcsv($fp, $line);
         }
-        error_log($ids);
+
         $page++;
         $struc["page"] = $page;
         $queryStr = base64_encode(json_encode($struc));
@@ -130,7 +130,6 @@ function commodities($letter) {
 
 function elastic($json_struc) {
     $options = array('Content-type: application/json', 'Content-Length: ' . strlen($json_struc));
-    error_log($json_struc);
     $ch = curl_init(ELASTIC_HOST);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $options);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
