@@ -302,8 +302,8 @@ function makeItems($termArray) {
     $retArray = array();
 
     foreach($termArray as $term) {
-        $retArray[] = strtolower($term);
-        //$retArray[] = $term;
+        //$retArray[] = strtolower($term);
+        $retArray[] = $term;
     }
     return implode(", ", $retArray);
 }
