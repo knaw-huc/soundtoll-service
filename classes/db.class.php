@@ -314,7 +314,7 @@ class db
 
     private function getScanURL($scan) {
         $parts = explode("_", $scan);
-        return SCAN_HOST . strtolower($parts[0] . "/" . $scan);
+        return SCAN_HOST . $parts[0] . "/" . $scan;
     }
 
     private function getIIIF($scan) {
