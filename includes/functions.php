@@ -154,7 +154,6 @@ function get_regions($size = "big") {
 
 function search($codedStruc, $download = false) {
     $json_struc = parse_codedStruc($codedStruc, $download);
-    //error_log($json_struc);
     $send_back = array();
     $result = elastic($json_struc);
     $send_back["amount"] = $result["hits"]["total"]["value"];
@@ -191,7 +190,7 @@ function parse_codedStruc($codedStruc, $download) {
         //if ($sortField == "jaar") {
         //    $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"jaar\": {\"order\":\"$sortAscDesc\"}}, { \"maand\": {\"order\":\"$sortAscDesc\"}}, { \"dag\": {\"order\":\"$sortAscDesc\"}}]}";
         //} else {
-            $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"$sortField\": {\"order\":\"$sortAscDesc\"}}]}";
+            $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_voornamen\",  \"schipper_tussenvoegsel\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"$sortField\": {\"order\":\"$sortAscDesc\"}}]}";
         //}
 
     } else {
@@ -243,24 +242,29 @@ function matchTemplate($term, $value) {
         case "jaar":
             return "{\"terms\": {\"jaar\": [$value]}}";
         default:
-            return "{\"terms\": {\"$term.raw\": [\"$value\"]}}";
+            return "{\"match\": {\"$term.raw\": \"$value\"}}";
     }
 }
 
 function get_ft_matches($values, $field) {
     $valArr = explode(",", $values);
     $lengte = count($valArr);
+    if ($field == "fulltext") {
+        $sField = $field;
+    } else {
+        $sField = $field .".raw";
+    }
     switch ($lengte) {
         case 0:
             return "";
         case 1:
-            $val = strtolower(trim($valArr[0]));
-            return "{\"wildcard\": {\"$field\": {\"value\": \"$val\"}}}";
+            $val = str_replace("-", "\\\\-", trim($valArr[0]));
+            return "{\"wildcard\": {\"$sField\": {\"value\": \"$val\", \"case_insensitive\": true}}}";
         default:
             $retArr = array();
             foreach ($valArr as $value) {
-                $val = strtolower(trim($value));
-                $retArr[] = "{\"wildcard\": {\"$field\": {\"value\": \"$val\"}}}";
+                $val = str_replace("-", "\\\\-", trim($value));
+                $retArr[] = "{\"wildcard\": {\"$sField\": {\"value\": \"$val\", \"case_insensitive\": true}}}";
             }
             return implode(",", $retArr);
     }
@@ -290,7 +294,7 @@ function queryTemplate($terms, $from, $sortOrder, $download) {
     if ($download) {
         return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 500, \"from\": $from, \"_source\": [\"id_doorvaart\"] }";
     } else {
-        return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" ,\"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"$sortField\": {\"order\":\"$sortAscDesc\"}} ] }";
+        return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_voornamen\", \"schipper_tussenvoegsel\", \"schipper_patroniem\" ,\"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"$sortField\": {\"order\":\"$sortAscDesc\"}} ] }";
     }
 
     //}

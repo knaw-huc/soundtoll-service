@@ -146,7 +146,7 @@ class db
             $tail = $this->addTail($commodity, $port);
             $query .= $tail;
         }
-        error_log($query);
+
         return $this->ass_arr($this->con->query($query));
     }
 
