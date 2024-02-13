@@ -155,6 +155,7 @@ function get_regions($size = "big") {
 function search($codedStruc, $download = false) {
     $json_struc = parse_codedStruc($codedStruc, $download);
     $send_back = array();
+    error_log($json_struc);
     $result = elastic($json_struc);
     $send_back["amount"] = $result["hits"]["total"]["value"];
     if ($download) {
@@ -206,7 +207,7 @@ function buildQuery($queryArray, $from, $sortOrder, $download) {
 
         if (strpos($item["field"], '.')) {
             if (strpos($item["field"], 'FREE_TEXT:') !== false) {
-                get_nested_free_texts($item["field"], makeItems($item["values"]), $terms);
+                get_nested_free_texts($item["field"], $item["values"], $terms);
             } else {
                 $fieldArray = explode(".", $item["field"]);
                 $terms[] = nestedTemplate($fieldArray, $item["values"]);
@@ -224,11 +225,15 @@ function get_nested_free_texts($entry, $values, &$terms) {
     $field = $components[1];
     $path = explode(".", $field);
     $path = $path[0];
-        $terms[] = "{\"nested\": {\"path\": \"$path\", \"query\": {\"wildcard\": {\"$field\": {\"value\": \"$values\"}}}}}";
+    foreach($values as $val) {
+        $terms[] = "{\"nested\": {\"path\": \"$path\", \"query\": {\"wildcard\": {\"$field\": {\"value\": \"$val\"}}}}}";
+    }
+
 }
 
 function matchTemplate($term, $value) {
     $components = explode(":", $term);
+    error_log($components[1]);
     if ($components[0] == "FREE_TEXT") {
         return get_ft_matches($value, $components[1]);
     }
@@ -252,7 +257,8 @@ function get_ft_matches($values, $field) {
     if ($field == "fulltext") {
         $sField = $field;
     } else {
-        $sField = $field .".raw";
+        //$sField = $field .".raw";
+        $sField = $field;
     }
     switch ($lengte) {
         case 0:
