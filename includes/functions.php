@@ -155,8 +155,12 @@ function get_regions($size = "big") {
 function search($codedStruc, $download = false) {
     $json_struc = parse_codedStruc($codedStruc, $download);
     $send_back = array();
-    error_log($json_struc);
     $result = elastic($json_struc);
+    $i = 0;
+    while  (is_null($result["hits"]["total"]["value"]) && $i < 10) {
+        $result = elastic($json_struc);
+        $i++;
+    }
     $send_back["amount"] = $result["hits"]["total"]["value"];
     if ($download) {
         $send_back["pages"] = ceil($result["hits"]["total"]["value"] / DOWNLOAD_PAGE_LENGTH);
@@ -188,15 +192,11 @@ function parse_codedStruc($codedStruc, $download) {
     $sortField = $sortElements[0];
     $sortAscDesc = $sortElements[1];
     if ($queryArray["searchvalues"] == "none") {
-        //if ($sortField == "jaar") {
-        //    $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"jaar\": {\"order\":\"$sortAscDesc\"}}, { \"maand\": {\"order\":\"$sortAscDesc\"}}, { \"dag\": {\"order\":\"$sortAscDesc\"}}]}";
-        //} else {
-            $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_voornamen\",  \"schipper_tussenvoegsel\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"$sortField\": {\"order\":\"$sortAscDesc\"}}]}";
-        //}
-
+        $json_struc = "{ \"query\": {\"match_all\": {}}, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_voornamen\",  \"schipper_tussenvoegsel\", \"schipper_patroniem\" , \"dag\", \"maand\", \"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [{ \"$sortField\": {\"order\":\"$sortAscDesc\"}}]}";
     } else {
         $json_struc = buildQuery($queryArray, $from, $sortOrder, $download);
     }
+    error_log($json_struc);
     return $json_struc;
 }
 
@@ -226,22 +226,55 @@ function get_nested_free_texts($entry, $values, &$terms) {
     $path = explode(".", $field);
     $path = $path[0];
     foreach($values as $val) {
-        $terms[] = "{\"nested\": {\"path\": \"$path\", \"query\": {\"wildcard\": {\"$field\": {\"value\": \"$val\"}}}}}";
+        if (strpos($val, " ")) {
+            $terms[] = ft_nested_phrase_term($field, $path, $val);
+        } else {
+            if (strpos($val, '*') || strpos($val, '?')) {
+                $terms[] = ft_nested_wildcard_term($field, $path, $val);
+            } else {
+                $terms[] = ft_nested_match_term($field, $path, $val);
+            }
+        }
     }
+}
 
+function ft_match_term($field, $val) {
+    return "{\"match\": {\"$field\": {\"query\": \"$val\"}}}";
+}
+
+function ft_wildcard_term($field, $val) {
+    return "{\"wildcard\": {\"$field\": {\"value\": \"$val\", \"case_insensitive\": true}}}";
+}
+
+function ft_phrase_term($field, $val) {
+    if ($field == 'fulltext') {
+        return "{\"multi_match\": {\"query\": \"$val\", \"type\": \"phrase\", \"fields\": [\"*\"]}}";
+    } else {
+        return "{\"match_phrase\": {\"$field\": {\"query\": \"$val\"}}}";
+    }
+}
+
+function ft_nested_match_term($field, $path, $val) {
+    $sub = ft_match_term($field, $val);
+    return "{\"nested\": {\"path\": \"$path\",\"query\": $sub}}";
+}
+
+function ft_nested_wildcard_term($field, $path, $val) {
+    $sub = ft_wildcard_term($field, $val);
+    return "{\"nested\": {\"path\": \"$path\",\"query\": $sub}}";
+}
+
+function ft_nested_phrase_term($field, $path, $val) {
+    $sub = ft_phrase_term($field, $val);
+    return "{\"nested\": {\"path\": \"$path\",\"query\": $sub}}";
 }
 
 function matchTemplate($term, $value) {
     $components = explode(":", $term);
-    error_log($components[1]);
     if ($components[0] == "FREE_TEXT") {
         return get_ft_matches($value, $components[1]);
     }
     switch ($term) {
-        //case "FREE_TEXT":
-            //return "{\"multi_match\": {\"query\": \"$value\"}}";
-            //return "{\"wildcard\": {\"fulltext\": {\"value\": \"$value\"}}}";
-            //return get_ft_matches($value);
         case "PERIOD":
             return yearValues($value);
         case "jaar":
@@ -254,26 +287,28 @@ function matchTemplate($term, $value) {
 function get_ft_matches($values, $field) {
     $valArr = explode(",", $values);
     $lengte = count($valArr);
-    if ($field == "fulltext") {
-        $sField = $field;
+    if ($lengte) {
+        return compose_ft_matches($field, $valArr);
     } else {
-        //$sField = $field .".raw";
-        $sField = $field;
+        return "";
     }
-    switch ($lengte) {
-        case 0:
-            return "";
-        case 1:
-            $val = str_replace("-", "\\\\-", trim($valArr[0]));
-            return "{\"wildcard\": {\"$sField\": {\"value\": \"$val\", \"case_insensitive\": true}}}";
-        default:
-            $retArr = array();
-            foreach ($valArr as $value) {
-                $val = str_replace("-", "\\\\-", trim($value));
-                $retArr[] = "{\"wildcard\": {\"$sField\": {\"value\": \"$val\", \"case_insensitive\": true}}}";
+}
+
+function compose_ft_matches($field, $values) {
+    $retArr = array();
+    foreach ($values as $value) {
+        $val = str_replace("-", "\\\\-", trim($value));
+        if (strpos($val, " ")) {
+            $retArr[] = ft_phrase_term($field, $val);
+        } else {
+            if (strpos($val, '*') || strpos($val, '?')) {
+                $retArr[] = ft_wildcard_term($field, $val);
+            } else {
+                $retArr[] = ft_match_term($field, $val);
             }
-            return implode(",", $retArr);
+        }
     }
+    return implode(",", $retArr);
 }
 
 function yearValues($range)
@@ -294,9 +329,6 @@ function queryTemplate($terms, $from, $sortOrder, $download) {
     $sortElements = explode(";", $sortOrder);
     $sortField = $sortElements[0];
     $sortAscDesc = $sortElements[1];
-    //if ($sortField == "jaar") {
-    //    return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 100, \"from\": $from, \"_source\": [\"id_doorvaart\", \"type\", \"schipper_achternaam\", \"schipper_naam\", \"schipper_patroniem\" ,\"dag\",\"maand\",\"jaar\", \"schipper_plaatsnaam\", \"van_eerste\", \"naar_eerste\"], \"sort\": [ { \"jaar\": {\"order\":\"$sortAscDesc\"}}, { \"maand\": {\"order\":\"$sortAscDesc\"}}, { \"dag\": {\"order\":\"$sortAscDesc\"}} ] }";
-    //} else {
     if ($download) {
         return "{ \"query\": { \"bool\": { \"must\": [ $terms ] } }, \"size\": 500, \"from\": $from, \"_source\": [\"id_doorvaart\"] }";
     } else {
@@ -311,7 +343,6 @@ function makeItems($termArray) {
     $retArray = array();
 
     foreach($termArray as $term) {
-        //$retArray[] = strtolower($term);
         $retArray[] = $term;
     }
     return implode(", ", $retArray);
